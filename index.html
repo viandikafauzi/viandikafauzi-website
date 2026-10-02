@@ -15,17 +15,65 @@ html,body{height:100%;background:#0a0a0a;color:#f5f5f5;font-family:system-ui,-ap
 body{display:flex;align-items:center;justify-content:center;text-align:center}
 main{max-width:600px;padding:2rem}
 h1{font-size:clamp(2.5rem,6vw,5rem);font-weight:800;letter-spacing:-0.03em;margin-bottom:0.5rem;color:#fff}
-p.tagline{font-size:1.1rem;color:#888;margin-bottom:2rem}
+p.tagline{font-size:1.1rem;color:#888;margin-bottom:2rem;cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 p.footer{position:fixed;bottom:1.5rem;left:0;right:0;text-align:center}
 p.footer a{color:#444;text-decoration:none;font-size:0.85rem;transition:color 0.2s}
 p.footer a:hover{color:#888}
+#omedeto{position:fixed;inset:0;z-index:10;display:none;align-items:center;justify-content:center;background:rgba(10,10,10,.93);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);cursor:pointer;outline:none}
+#omedeto.open{display:flex}
+#omedeto img{display:block;width:min(88vw,400px);height:auto;border-radius:2px}
 </style>
 </head>
 <body>
 <main>
 <h1>viandika</h1>
-<p class="tagline">builds things</p>
+<p class="tagline" id="tagline">builds things</p>
 </main>
+<div id="omedeto" role="dialog" aria-modal="true" aria-label="omedetou" tabindex="-1">
+<img id="omedeto-gif" alt="Evangelion characters applauding and saying congratulations" decoding="async">
+</div>
 <p class="footer"><a href="https://github.com/viandikafauzi">github.com/viandikafauzi</a></p>
+<script>
+(function () {
+var gifs = ['assets/omedetou.gif', 'assets/congratulations.gif'];
+var delays = [3200, 11000];
+var tag = document.getElementById('tagline');
+var modal = document.getElementById('omedeto');
+var img = document.getElementById('omedeto-gif');
+var clicks = 0, resets, swap, turn = 0, warm = false;
+function step() {
+  swap = setTimeout(function () {
+    turn = (turn + 1) % gifs.length;
+    img.src = gifs[turn];
+    step();
+  }, delays[turn]);
+}
+function close() {
+  if (!modal.classList.contains('open')) return;
+  modal.classList.remove('open');
+  clearTimeout(swap);
+  img.removeAttribute('src');
+}
+tag.addEventListener('click', function () {
+  if (!warm) {
+    warm = true;
+    img.src = gifs[0];
+    new Image().src = gifs[1];
+  }
+  clearTimeout(resets);
+  resets = setTimeout(function () { clicks = 0; }, 1500);
+  if (++clicks < 3) return;
+  clicks = 0;
+  turn = 0;
+  img.src = gifs[0];
+  modal.classList.add('open');
+  modal.focus();
+  clearTimeout(swap);
+  step();
+});
+modal.addEventListener('click', close);
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+})();
+</script>
 </body>
 </html>
